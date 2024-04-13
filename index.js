@@ -4,6 +4,9 @@ const cors = require('cors')
 
 const app = express()
 
+// 使express显示静态内容
+app.use(express.static('build'))
+
 app.use(cors())
 // app.use(morgan('combined'));
 
