@@ -1,6 +1,9 @@
+require('dotenv').config();
 const express = require('express')
 const morgan = require('morgan')
 const cors = require('cors')
+
+const Note = require('./models/note')
 
 const app = express()
 
@@ -102,20 +105,20 @@ app.post('/api/notes', (request, response) => {
         })
     }
 
-    const note = {
+    const note = new Note({
         content: body.content,
         important: body.important || false,
-        date: new Date(),
-        id: generateId(),
-    }
+    })
 
-    notes = notes.concat(note)
-
-    response.json(note)
+    note.save().then(res => {
+        console.log('note saved!', res)
+        response.json(res)
+    })
 })
 
 // post 创建 persons
 app.post('/api/persons', (request, response) => {
+
     const body = request.body
 
     if (!body.name) {
@@ -163,7 +166,14 @@ app.delete('/api/notes/:id', (request, response) => {
 })
 
 app.get('/api/notes', (request, response) => {
-    response.json(notes)
+    // 查询
+    Note.find({
+        // important: false
+    }).then(result => {
+        console.log(result, 'result')
+        response.json(result)
+        // mongoose.connection.close()
+    })
 })
 
 // 要放在路由后面，当匹配不到前面路由时会进入这儿
@@ -173,7 +183,7 @@ const unknownEndpoint = (request, response) => {
 
 app.use(unknownEndpoint)
 
-const PORT = 3002
+const PORT = process.env.PORT
 
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`)
